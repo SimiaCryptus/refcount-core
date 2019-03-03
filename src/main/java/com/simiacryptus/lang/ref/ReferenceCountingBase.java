@@ -279,9 +279,14 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     }
     int refs = references.decrementAndGet();
     if (refs < 0 && !detached) {
-      logger.warn(String.format("Error freeing reference for %s", getClass().getSimpleName()));
-      logger.warn(referenceReport(true, isFinalized()));
-      throw new LifecycleException(this);
+      boolean isInFinalizer = Arrays.stream(Thread.currentThread().getStackTrace()).filter(x -> x.getClassName().equals("java.lang.ref.Finalizer")).findAny().isPresent();
+      if(!isInFinalizer) {
+        logger.warn(String.format("Error freeing reference for %s", getClass().getSimpleName()));
+        logger.warn(referenceReport(true, isFinalized()));
+        throw new LifecycleException(this);
+      } else {
+        return;
+      }
     }
 
     synchronized (freeRefObjs) {
