@@ -58,11 +58,11 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     if (RefSettings.INSTANCE() == null) throw new RuntimeException();
   }
 
-  private transient final UUID objectId = RefSettings.INSTANCE().isLifecycleDebug() ? UUID.randomUUID() : jvmId;
+  private transient final UUID objectId = RefSettings.INSTANCE().isLifecycleDebug(this) ? UUID.randomUUID() : jvmId;
   private transient final AtomicInteger references = new AtomicInteger(1);
   private transient final AtomicBoolean isFreed = new AtomicBoolean(false);
   @Nullable
-  private transient final StackTraceElement[] createdBy = RefSettings.INSTANCE().isLifecycleDebug() ? Thread.currentThread().getStackTrace() : null;
+  private transient final StackTraceElement[] createdBy = RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : null;
   private transient final LinkedList<StackTraceElement[]> addRefs = new LinkedList<>();
   private transient final LinkedList<StackTraceElement[]> freeRefs = new LinkedList<>();
   private transient final LinkedList<UUID> addRefObjs = new LinkedList<>();
@@ -173,7 +173,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   public void addRef(ReferenceCounting obj) {
     assertAlive();
     if (references.incrementAndGet() <= 1) throw new IllegalStateException(referenceReport(true, isFinalized()));
-    if (RefSettings.INSTANCE().isLifecycleDebug()) {
+    if (RefSettings.INSTANCE().isLifecycleDebug(this)) {
       addRefs.add(Thread.currentThread().getStackTrace());
     }
     synchronized (addRefObjs) {
@@ -290,7 +290,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     }
 
     synchronized (freeRefObjs) {
-      if (RefSettings.INSTANCE().isLifecycleDebug()) freeRefs.add(Thread.currentThread().getStackTrace());
+      if (RefSettings.INSTANCE().isLifecycleDebug(this)) freeRefs.add(Thread.currentThread().getStackTrace());
       freeRefObjs.add(obj.getObjectId());
     }
     if (refs == 0 && !detached) {
@@ -321,7 +321,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
         }
       }
       synchronized (freeRefObjs) {
-        if (RefSettings.INSTANCE().isLifecycleDebug()) freeRefs.add(Thread.currentThread().getStackTrace());
+        if (RefSettings.INSTANCE().isLifecycleDebug(this)) freeRefs.add(Thread.currentThread().getStackTrace());
         freeRefObjs.add(this.objectId);
       }
       _free();

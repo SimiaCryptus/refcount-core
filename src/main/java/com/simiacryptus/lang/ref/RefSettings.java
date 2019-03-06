@@ -61,8 +61,10 @@ public class RefSettings implements Settings {
    * Is lifecycle debug boolean.
    *
    * @return the boolean
+   * @param obj
    */
-  public boolean isLifecycleDebug() {
+  public boolean isLifecycleDebug(ReferenceCountingBase obj) {
+//    if (obj.getClass().getName().endsWith("DeltaSet")) return true;
     return lifecycleDebug;
   }
 

@@ -124,7 +124,7 @@ public interface Settings {
    * @param obj the obj
    * @return the char sequence
    */
-  public static CharSequence toJson(final Object obj) {
+  static CharSequence toJson(final Object obj) {
     return toJson(obj, getMapper());
   }
 
@@ -136,7 +136,7 @@ public interface Settings {
    * @return the char sequence
    */
   @Nonnull
-  public static CharSequence toJson(final Object obj, final ObjectMapper objectMapper) {
+  static CharSequence toJson(final Object obj, final ObjectMapper objectMapper) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
       objectMapper.writeValue(outputStream, obj);
@@ -151,7 +151,7 @@ public interface Settings {
    *
    * @return the mapper
    */
-  public static ObjectMapper getMapper() {
+  static ObjectMapper getMapper() {
     ObjectMapper enable = new ObjectMapper()
         //.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
         .enable(SerializationFeature.INDENT_OUTPUT);
