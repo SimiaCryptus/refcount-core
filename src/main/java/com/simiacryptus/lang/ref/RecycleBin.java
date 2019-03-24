@@ -154,10 +154,10 @@ public abstract class RecycleBin<T> {
    */
   public long clear() {
     Map<Long, ConcurrentLinkedDeque<ObjectWrapper>> buckets = this.buckets;
-    if(null == buckets) return 0;
+    if (null == buckets) return 0;
     return buckets.keySet().stream().mapToLong(length -> {
       ConcurrentLinkedDeque<ObjectWrapper> remove = buckets.remove(length);
-      if(null == remove || remove.isEmpty()) return 0;
+      if (null == remove || remove.isEmpty()) return 0;
       return remove.stream().mapToLong(ref -> {
         return freeItem(ref.obj.get(), length);
       }).sum();

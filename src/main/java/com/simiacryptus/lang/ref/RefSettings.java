@@ -46,9 +46,9 @@ public class RefSettings implements Settings {
    * @return the core settings
    */
   public static RefSettings INSTANCE() {
-    if(null==INSTANCE) {
+    if (null == INSTANCE) {
       synchronized (RefSettings.class) {
-        if(null==INSTANCE) {
+        if (null == INSTANCE) {
           INSTANCE = new RefSettings();
           logger.info(String.format("Initialized %s = %s", INSTANCE.getClass().getSimpleName(), Settings.toJson(INSTANCE)));
         }
@@ -60,8 +60,8 @@ public class RefSettings implements Settings {
   /**
    * Is lifecycle debug boolean.
    *
-   * @return the boolean
    * @param obj
+   * @return the boolean
    */
   public boolean isLifecycleDebug(ReferenceCountingBase obj) {
 //    if (obj.getClass().getName().endsWith("DeltaSet")) return true;

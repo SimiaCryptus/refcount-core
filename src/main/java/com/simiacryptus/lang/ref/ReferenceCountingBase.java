@@ -75,10 +75,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     return null == trace ? "" : Arrays.stream(trace).map(x -> "at " + x).skip(2).reduce((a, b) -> a + "\n" + b).orElse("");
   }
 
-  protected final Object readResolve() throws ObjectStreamException {
-    return detach();
-  }
-
   /**
    * Detail string string.
    *
@@ -140,6 +136,10 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
    */
   public static <T> List<T> reverseCopy(final T[] x) {
     return IntStream.range(0, x.length).map(i -> (x.length - 1) - i).mapToObj(i -> x[i]).collect(Collectors.toList());
+  }
+
+  protected final Object readResolve() throws ObjectStreamException {
+    return detach();
   }
 
   @Override
@@ -280,7 +280,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     int refs = references.decrementAndGet();
     if (refs < 0 && !detached) {
       boolean isInFinalizer = Arrays.stream(Thread.currentThread().getStackTrace()).filter(x -> x.getClassName().equals("java.lang.ref.Finalizer")).findAny().isPresent();
-      if(!isInFinalizer) {
+      if (!isInFinalizer) {
         logger.warn(String.format("Error freeing reference for %s", getClass().getSimpleName()));
         logger.warn(referenceReport(true, isFinalized()));
         throw new LifecycleException(this);
