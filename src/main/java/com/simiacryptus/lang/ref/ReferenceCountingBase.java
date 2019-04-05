@@ -49,6 +49,12 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   private static final UUID jvmId = UUID.randomUUID();
   private static final ExecutorService gcPool = newFixedThreadPool(1, new ThreadFactoryBuilder()
       .setDaemon(true).build());
+  private static final ThreadLocal<Boolean> inFinalizer = new ThreadLocal<Boolean>() {
+    @Override
+    protected Boolean initialValue() {
+      return false;
+    }
+  };
   /**
    * The constant supressLog.
    */
@@ -253,7 +259,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     if (isFinalized) {
       throw new LifecycleException(this);
     }
-    if (isFinalized()) {
+    if (isFinalized() && !inFinalizer.get()) {
       logger.warn(String.format("Using freed reference for %s", getClass().getSimpleName()));
       logger.warn(referenceReport(true, isFinalized()));
       throw new LifecycleException(this);
@@ -273,6 +279,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
 
   @Override
   public void freeRef(ReferenceCounting obj) {
+    assertAlive();
     if (isFinalized) {
       //logger.debug("Object has been finalized");
       return;
@@ -298,7 +305,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
         try {
           _free();
         } catch (LifecycleException e) {
-          logger.info("Error freeing resources: " + referenceReport(true, isFinalized()));
+          if (!inFinalizer.get()) logger.info("Error freeing resources: " + referenceReport(true, isFinalized()));
           throw e;
         }
       }
@@ -324,7 +331,12 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
         if (RefSettings.INSTANCE().isLifecycleDebug(this)) freeRefs.add(Thread.currentThread().getStackTrace());
         freeRefObjs.add(this.objectId);
       }
-      _free();
+      inFinalizer.set(true);
+      try {
+        _free();
+      } finally {
+        inFinalizer.set(false);
+      }
     }
   }
 
