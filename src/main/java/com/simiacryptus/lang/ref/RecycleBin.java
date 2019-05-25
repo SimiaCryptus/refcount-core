@@ -351,11 +351,13 @@ public abstract class RecycleBin<T> {
       }
       ConcurrentLinkedDeque<ObjectWrapper> bin = getBin(size);
       if (bin.size() < Math.min(Math.max(1, (int) (getMaxLengthPerBuffer() / size)), getMaxItemsPerBuffer())) {
-        synchronized (bin) {
-          if (!bin.stream().filter(x -> equals(x.obj.get(), data)).findAny().isPresent()) {
-            bin.add(new ObjectWrapper(wrap(data)));
-            return;
-          }
+//        synchronized (bin) {
+//        }
+        boolean present = bin.stream().filter(x -> equals(x.obj.get(), data)).findAny().isPresent();
+        if(present) throw new IllegalStateException();
+        else  {
+          bin.add(new ObjectWrapper(wrap(data)));
+          return;
         }
       }
     }
