@@ -354,8 +354,8 @@ public abstract class RecycleBin<T> {
 //        synchronized (bin) {
 //        }
         boolean present = bin.stream().filter(x -> equals(x.obj.get(), data)).findAny().isPresent();
-        if(present) throw new IllegalStateException();
-        else  {
+        if (present) throw new IllegalStateException();
+        else {
           bin.add(new ObjectWrapper(wrap(data)));
           return;
         }
