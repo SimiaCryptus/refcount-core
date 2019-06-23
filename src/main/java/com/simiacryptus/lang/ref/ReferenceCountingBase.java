@@ -38,10 +38,6 @@ import java.util.stream.Stream;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
-/**
- * The base implementation for ReferenceCounting objects. Provides state management and debugging facilities. If
- * assertions are enabled, stack traces are recorded to provide detailed logs for debugging LifecycleExceptions.
- */
 public abstract class ReferenceCountingBase implements ReferenceCounting {
 
   private static final Logger logger = LoggerFactory.getLogger(ReferenceCountingBase.class);
@@ -55,9 +51,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
       return false;
     }
   };
-  /**
-   * The constant supressLog.
-   */
   public static boolean supressLog = false;
 
   static {
@@ -81,34 +74,14 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     return null == trace ? "" : Arrays.stream(trace).map(x -> "at " + x).skip(2).reduce((a, b) -> a + "\n" + b).orElse("");
   }
 
-  /**
-   * Detail string string.
-   *
-   * @param obj           the obj
-   * @param includeCaller the include caller
-   * @return the string
-   */
   public static CharSequence referenceReport(@Nonnull ReferenceCountingBase obj, boolean includeCaller) {
     return obj.referenceReport(includeCaller, obj.isFinalized());
   }
 
-  /**
-   * Remove suffix stack trace element [ ].
-   *
-   * @param stack  the stack
-   * @param prefix the prefix
-   * @return the stack trace element [ ]
-   */
   public static StackTraceElement[] removeSuffix(final StackTraceElement[] stack, final Collection<StackTraceElement> prefix) {
     return Arrays.stream(stack).limit(stack.length - prefix.size()).toArray(i -> new StackTraceElement[i]);
   }
 
-  /**
-   * Find common prefix list.
-   *
-   * @param reversedStacks the reversed stacks
-   * @return the list
-   */
   public static List<StackTraceElement> findCommonPrefix(final List<List<StackTraceElement>> reversedStacks) {
     if (0 == reversedStacks.size()) return null;
     List<StackTraceElement> protoprefix = reversedStacks.get(0);
@@ -121,25 +94,11 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     return protoprefix;
   }
 
-  /**
-   * Reverse copy list.
-   *
-   * @param <T> the type parameter
-   * @param x   the x
-   * @return the list
-   */
   public static <T> List<T> reverseCopy(final List<T> x) {
     if (null == x) return Arrays.asList();
     return IntStream.range(0, x.size()).map(i -> (x.size() - 1) - i).mapToObj(i -> x.get(i)).collect(Collectors.toList());
   }
 
-  /**
-   * Reverse copy list.
-   *
-   * @param <T> the type parameter
-   * @param x   the x
-   * @return the list
-   */
   public static <T> List<T> reverseCopy(final T[] x) {
     return IntStream.range(0, x.length).map(i -> (x.length - 1) - i).mapToObj(i -> x[i]).collect(Collectors.toList());
   }
@@ -191,13 +150,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     return isFreed.get();
   }
 
-  /**
-   * Reference report string.
-   *
-   * @param includeCaller the include caller
-   * @param isFinalized   the is finalized
-   * @return the string
-   */
   public String referenceReport(boolean includeCaller, boolean isFinalized) {
     @Nonnull ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     @Nonnull PrintStream out = new PrintStream(buffer);
@@ -252,9 +204,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     return buffer.toString();
   }
 
-  /**
-   * Assert alive.
-   */
   public boolean assertAlive() {
     if (isFinalized) {
       throw new LifecycleException(this);
@@ -312,9 +261,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     }
   }
 
-  /**
-   * Free.
-   */
   protected void _free() {
   }
 
@@ -340,18 +286,10 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     }
   }
 
-  /**
-   * Is floating boolean.
-   *
-   * @return the boolean
-   */
   public boolean isDetached() {
     return detached;
   }
 
-  /**
-   * Sets floating.
-   */
   public ReferenceCountingBase detach() {
     this.detached = true;
     return this;

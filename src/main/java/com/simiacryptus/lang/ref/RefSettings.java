@@ -23,9 +23,6 @@ import com.simiacryptus.lang.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The type Cuda settings.
- */
 public class RefSettings implements Settings {
 
   private static final Logger logger = LoggerFactory.getLogger(RefSettings.class);
@@ -40,11 +37,6 @@ public class RefSettings implements Settings {
     this.doubleCacheMode = Settings.get("DOUBLE_CACHE_MODE", PersistanceMode.WEAK);
   }
 
-  /**
-   * The constant INSTANCE.
-   *
-   * @return the core settings
-   */
   public static RefSettings INSTANCE() {
     if (null == INSTANCE) {
       synchronized (RefSettings.class) {
@@ -57,22 +49,11 @@ public class RefSettings implements Settings {
     return INSTANCE;
   }
 
-  /**
-   * Is lifecycle debug boolean.
-   *
-   * @param obj
-   * @return the boolean
-   */
   public boolean isLifecycleDebug(ReferenceCountingBase obj) {
 //    if (obj.getClass().getName().endsWith("DeltaSet")) return true;
     return lifecycleDebug;
   }
 
-  /**
-   * Gets double cacheLocal mode.
-   *
-   * @return the double cacheLocal mode
-   */
   public PersistanceMode getDoubleCacheMode() {
     return doubleCacheMode;
   }

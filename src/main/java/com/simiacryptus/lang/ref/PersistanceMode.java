@@ -25,32 +25,19 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.function.Supplier;
 
-/**
- * Varying levels of persistence which can be used to provide reference wrappers to an object. Allows the RecycleBin to
- * be configured apply the desired reference type.
- */
 public enum PersistanceMode {
-  /**
-   * Soft persistance mode.
-   */
   SOFT {
     @Override
     public <T> Supplier<T> wrap(T obj) {
       return new SoftReference<>(obj)::get;
     }
   },
-  /**
-   * Weak persistance mode.
-   */
   WEAK {
     @Override
     public <T> Supplier<T> wrap(T obj) {
       return new WeakReference<>(obj)::get;
     }
   },
-  /**
-   * Strong persistance mode.
-   */
   STRONG {
     @Nonnull
     @Override
@@ -58,9 +45,6 @@ public enum PersistanceMode {
       return () -> obj;
     }
   },
-  /**
-   * Disabled persistance mode.
-   */
   NULL {
     @Nullable
     @Override
@@ -69,13 +53,6 @@ public enum PersistanceMode {
     }
   };
 
-  /**
-   * Wrap supplier.
-   *
-   * @param <T> the type parameter
-   * @param obj the obj
-   * @return the supplier
-   */
   @Nullable
   public abstract <T> Supplier<T> wrap(T obj);
 }

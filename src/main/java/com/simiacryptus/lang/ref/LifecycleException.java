@@ -21,21 +21,10 @@ package com.simiacryptus.lang.ref;
 
 import javax.annotation.Nonnull;
 
-/**
- * A runtime exception when performing an invalid operation on a ReferenceCounted object.
- */
 public class LifecycleException extends RuntimeException {
-  /**
-   * The Obj.
-   */
   @Nonnull
   public final ReferenceCounting obj;
 
-  /**
-   * Instantiates a new Lifecycle exception.
-   *
-   * @param obj the obj
-   */
   public LifecycleException(@Nonnull ReferenceCountingBase obj) {
     super("Lifecycle Exception: " + ReferenceCountingBase.referenceReport(obj, false));
     this.obj = obj;
