@@ -27,7 +27,7 @@ public interface ReferenceCounting {
 
   ReferenceCounting addRef();
 
-  void freeRef();
+  int freeRef();
 
   void freeRefAsync();
 
@@ -39,7 +39,7 @@ public interface ReferenceCounting {
 
   boolean assertAlive();
 
-  void freeRef(ReferenceCounting obj);
+  int freeRef(ReferenceCounting obj);
 
   UUID getObjectId();
 

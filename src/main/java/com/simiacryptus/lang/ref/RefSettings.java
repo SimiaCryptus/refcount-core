@@ -23,6 +23,10 @@ import com.simiacryptus.lang.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class RefSettings implements Settings {
 
   private static final Logger logger = LoggerFactory.getLogger(RefSettings.class);
@@ -30,11 +34,23 @@ public class RefSettings implements Settings {
 
   private final boolean lifecycleDebug;
   private final PersistanceMode doubleCacheMode;
+  private final Set<Class<?>> watchedClasses;
 
   protected RefSettings() {
     System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", Integer.toString(Settings.get("THREADS", 64)));
     this.lifecycleDebug = Settings.get("DEBUG_LIFECYCLE", false);
     this.doubleCacheMode = Settings.get("DOUBLE_CACHE_MODE", PersistanceMode.WEAK);
+    this.watchedClasses = Stream.of(
+        "com.simiacryptus.mindseye.lang.TensorArray",
+        "com.simiacryptus.mindseye.lang.cudnn.CudaTensor"
+    ).map(name-> {
+      try {
+        return Class.forName(name);
+      } catch (ClassNotFoundException e) {
+        logger.warn("No Class Found: " + name);
+        return null;
+      }
+    }).filter(x->x!=null).collect(Collectors.toSet());
   }
 
   public static RefSettings INSTANCE() {
@@ -50,8 +66,11 @@ public class RefSettings implements Settings {
   }
 
   public boolean isLifecycleDebug(ReferenceCountingBase obj) {
-//    if (obj.getClass().getName().endsWith("DeltaSet")) return true;
-    return lifecycleDebug;
+    if (watchedClasses.contains(obj.getClass())) {
+      return true;
+    } else {
+      return lifecycleDebug;
+    }
   }
 
   public PersistanceMode getDoubleCacheMode() {

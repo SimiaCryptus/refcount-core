@@ -217,8 +217,8 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   }
 
   @Override
-  public void freeRef() {
-    freeRef(this);
+  public int freeRef() {
+    return freeRef(this);
   }
 
   @Override
@@ -227,11 +227,11 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   }
 
   @Override
-  public void freeRef(ReferenceCounting obj) {
+  public int freeRef(ReferenceCounting obj) {
     assertAlive();
     if (isFinalized) {
       //logger.debug("Object has been finalized");
-      return;
+      return 0;
     }
     int refs = references.decrementAndGet();
     if (refs < 0 && !detached) {
@@ -241,7 +241,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
         logger.warn(referenceReport(true, isFinalized()));
         throw new LifecycleException(this);
       } else {
-        return;
+        return refs;
       }
     }
 
@@ -259,6 +259,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
         }
       }
     }
+    return refs;
   }
 
   protected void _free() {
