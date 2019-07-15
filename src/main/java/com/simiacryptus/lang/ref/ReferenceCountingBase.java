@@ -64,8 +64,6 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   private transient final StackTraceElement[] createdBy = RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : null;
   private transient final LinkedList<StackTraceElement[]> addRefs = new LinkedList<>();
   private transient final LinkedList<StackTraceElement[]> freeRefs = new LinkedList<>();
-  private transient final LinkedList<UUID> addRefObjs = new LinkedList<>();
-  private transient final LinkedList<UUID> freeRefObjs = new LinkedList<>();
   private transient volatile boolean isFinalized = false;
   private transient boolean detached = false;
 
@@ -113,37 +111,19 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   }
 
   @Override
+  public boolean tryAddRef() {
+    if (references.updateAndGet(i -> i > 0 ? i + 1 : 0) == 0) {
+      return false;
+    }
+    addRefs.add(RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : new StackTraceElement[]{});
+    return true;
+  }
+
+  @Override
   public ReferenceCounting addRef() {
-    addRef(this);
+    if (references.updateAndGet(i -> i > 0 ? i + 1 : 0) == 0) throw new IllegalStateException(referenceReport(true, isFinalized()));
+    addRefs.add(RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : new StackTraceElement[]{});
     return this;
-  }
-
-  @Override
-  public void claimRef(ReferenceCounting obj) {
-    assertAlive();
-    synchronized (addRefObjs) {
-      for (Iterator<UUID> iterator = addRefObjs.iterator(); iterator.hasNext(); ) {
-        final UUID addRefObj = iterator.next();
-        if (addRefObj.equals(this.objectId)) {
-          iterator.remove();
-          addRefObjs.add(obj.getObjectId());
-          return;
-        }
-      }
-    }
-    throw new IllegalStateException("No reference to claim found");
-  }
-
-  @Override
-  public void addRef(ReferenceCounting obj) {
-    assertAlive();
-    if (references.incrementAndGet() <= 1) throw new IllegalStateException(referenceReport(true, isFinalized()));
-    if (RefSettings.INSTANCE().isLifecycleDebug(this)) {
-      addRefs.add(Thread.currentThread().getStackTrace());
-    }
-    synchronized (addRefObjs) {
-      addRefObjs.add(obj.getObjectId());
-    }
   }
 
   public final boolean isFinalized() {
@@ -154,7 +134,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     @Nonnull ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     @Nonnull PrintStream out = new PrintStream(buffer);
     out.print(String.format("Object %s %s (%d refs, %d frees) ",
-        getClass().getName(), getObjectId().toString(), 1 + addRefObjs.size(), freeRefObjs.size()));
+        getClass().getName(), getObjectId().toString(), 1 + addRefs.size(), freeRefs.size()));
     List<StackTraceElement> prefix = reverseCopy(findCommonPrefix(Stream.concat(
         Stream.<StackTraceElement[]>of(createdBy),
         Stream.concat(
@@ -169,32 +149,26 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
       out.println(String.format("created by \n\t%s",
           getString(trace).replaceAll("\n", "\n\t")));
     }
-    synchronized (addRefObjs) {
+    synchronized (addRefs) {
 
-      for (int i = 0; i < addRefObjs.size(); i++) {
+      for (int i = 0; i < addRefs.size(); i++) {
         StackTraceElement[] stack = i < addRefs.size() ? addRefs.get(i) : new StackTraceElement[]{};
         stack = removeSuffix(stack, prefix);
-        UUID linkObj = addRefObjs.get(i);
-        CharSequence linkStr = this.equals(linkObj) ? "" : linkObj.toString();
-        out.println(String.format("reference added by %s\n\t%s", linkStr,
+        out.println(String.format("reference added by %s\n\t%s", "",
             getString(stack).replaceAll("\n", "\n\t")));
       }
     }
-    synchronized (freeRefObjs) {
-      for (int i = 0; i < freeRefObjs.size() - (isFinalized ? 1 : 0); i++) {
+    synchronized (freeRefs) {
+      for (int i = 0; i < freeRefs.size() - (isFinalized ? 1 : 0); i++) {
         StackTraceElement[] stack = i < freeRefs.size() ? freeRefs.get(i) : new StackTraceElement[]{};
         stack = removeSuffix(stack, prefix);
-        UUID linkObj = freeRefObjs.get(i);
-        CharSequence linkStr = objectId == linkObj ? "" : linkObj.toString();
-        out.println(String.format("reference removed by %s\n\t%s", linkStr,
+        out.println(String.format("reference removed by %s\n\t%s", "",
             getString(stack).replaceAll("\n", "\n\t")));
       }
       if (isFinalized && 0 < freeRefs.size()) {
-        UUID linkObj = freeRefObjs.isEmpty() ? objectId : freeRefObjs.get(freeRefObjs.size() - 1);
-        CharSequence linkStr = objectId.equals(linkObj) ? "" : linkObj.toString();
         StackTraceElement[] stack = freeRefs.get(freeRefs.size() - 1);
         stack = removeSuffix(stack, prefix);
-        out.println(String.format("freed by %s\n\t%s", linkStr,
+        out.println(String.format("freed by %s\n\t%s", "",
             (0 == freeRefs.size() ? "" : getString(stack)).replaceAll("\n", "\n\t")));
       }
     }
@@ -217,18 +191,12 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   }
 
   @Override
-  public int freeRef() {
-    return freeRef(this);
-  }
-
-  @Override
   public void freeRefAsync() {
     gcPool.submit((Runnable) this::freeRef);
   }
 
   @Override
-  public int freeRef(ReferenceCounting obj) {
-    assertAlive();
+  public int freeRef() {
     if (isFinalized) {
       //logger.debug("Object has been finalized");
       return 0;
@@ -245,9 +213,8 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
       }
     }
 
-    synchronized (freeRefObjs) {
-      if (RefSettings.INSTANCE().isLifecycleDebug(this)) freeRefs.add(Thread.currentThread().getStackTrace());
-      freeRefObjs.add(obj.getObjectId());
+    synchronized (freeRefs) {
+      freeRefs.add(RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : new StackTraceElement[]{});
     }
     if (refs == 0 && !detached) {
       if (!isFreed.getAndSet(true)) {
@@ -274,9 +241,8 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
           logger.debug(String.format("Instance Reclaimed by GC at %.9f: %s", (System.nanoTime() - LOAD_TIME) / 1e9, referenceReport(false, false)));
         }
       }
-      synchronized (freeRefObjs) {
-        if (RefSettings.INSTANCE().isLifecycleDebug(this)) freeRefs.add(Thread.currentThread().getStackTrace());
-        freeRefObjs.add(this.objectId);
+      synchronized (freeRefs) {
+        freeRefs.add(RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : new StackTraceElement[]{});
       }
       inFinalizer.set(true);
       try {

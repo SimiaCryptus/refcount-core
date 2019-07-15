@@ -25,21 +25,17 @@ public interface ReferenceCounting {
 
   int currentRefCount();
 
-  ReferenceCounting addRef();
-
-  int freeRef();
-
   void freeRefAsync();
 
-  void claimRef(ReferenceCounting obj);
+  ReferenceCounting addRef();
 
-  void addRef(ReferenceCounting obj);
+  boolean tryAddRef();
 
   boolean isFinalized();
 
   boolean assertAlive();
 
-  int freeRef(ReferenceCounting obj);
+  int freeRef();
 
   UUID getObjectId();
 
