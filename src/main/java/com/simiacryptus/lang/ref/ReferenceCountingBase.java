@@ -61,7 +61,7 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
   private transient final AtomicInteger references = new AtomicInteger(1);
   private transient final AtomicBoolean isFreed = new AtomicBoolean(false);
   @Nullable
-  private transient final StackTraceElement[] createdBy = RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : null;
+  private transient final StackTraceElement[] refCreatedBy = RefSettings.INSTANCE().isLifecycleDebug(this) ? Thread.currentThread().getStackTrace() : null;
   private transient final LinkedList<StackTraceElement[]> addRefs = new LinkedList<>();
   private transient final LinkedList<StackTraceElement[]> freeRefs = new LinkedList<>();
   private transient volatile boolean isFinalized = false;
@@ -136,15 +136,15 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
     out.print(String.format("Object %s %s (%d refs, %d frees) ",
         getClass().getName(), getObjectId().toString(), 1 + addRefs.size(), freeRefs.size()));
     List<StackTraceElement> prefix = reverseCopy(findCommonPrefix(Stream.concat(
-        Stream.<StackTraceElement[]>of(createdBy),
+        Stream.<StackTraceElement[]>of(refCreatedBy),
         Stream.concat(
             addRefs.stream(),
             freeRefs.stream()
         )
     ).filter(x -> x != null).map(x -> reverseCopy(x)).collect(Collectors.toList())));
 
-    if (null != createdBy) {
-      StackTraceElement[] trace = this.createdBy;
+    if (null != refCreatedBy) {
+      StackTraceElement[] trace = this.refCreatedBy;
       //trace = removeSuffix(trace, prefix);
       out.println(String.format("created by \n\t%s",
           getString(trace).replaceAll("\n", "\n\t")));

@@ -41,6 +41,8 @@ public class RefSettings implements Settings {
     this.lifecycleDebug = Settings.get("DEBUG_LIFECYCLE", false);
     this.doubleCacheMode = Settings.get("DOUBLE_CACHE_MODE", PersistanceMode.WEAK);
     this.watchedClasses = Stream.<String>of(
+        "com.simiacryptus.mindseye.network.GraphEvaluationContext"
+//        "com.simiacryptus.mindseye.lang.Tensor"
 //        "com.simiacryptus.mindseye.layers.cudnn.PoolingLayer",
 //        "com.simiacryptus.mindseye.lang.TensorArray",
 //        "com.simiacryptus.mindseye.lang.cudnn.CudaTensor"
