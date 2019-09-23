@@ -21,8 +21,20 @@ package com.simiacryptus.lang.ref;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class LazyVal<T extends ReferenceCounting> extends ReferenceCountingBase {
+import java.util.function.Supplier;
+
+public abstract class LazyVal<T extends ReferenceCounting> extends ReferenceCountingBase implements Supplier<T> {
   private volatile T val = null;
+
+  public static <T extends ReferenceCounting> LazyVal<T> wrap(Supplier<T> fn) {
+    return new LazyVal<T>() {
+      @NotNull
+      @Override
+      protected T build() {
+        return fn.get();
+      }
+    };
+  }
 
   @Override
   protected void _free() {
