@@ -154,22 +154,25 @@ public abstract class ReferenceCountingBase implements ReferenceCounting {
       for (int i = 0; i < addRefs.size(); i++) {
         StackTraceElement[] stack = i < addRefs.size() ? addRefs.get(i) : new StackTraceElement[]{};
         stack = removeSuffix(stack, prefix);
-        out.println(String.format("reference added by %s\n\t%s", "",
-            getString(stack).replaceAll("\n", "\n\t")));
+        final String string = getString(stack);
+        if (!string.trim().isEmpty()) out.println(String.format("reference added by %s\n\t%s", "",
+            string.replaceAll("\n", "\n\t")));
       }
     }
     synchronized (freeRefs) {
       for (int i = 0; i < freeRefs.size() - (isFinalized ? 1 : 0); i++) {
         StackTraceElement[] stack = i < freeRefs.size() ? freeRefs.get(i) : new StackTraceElement[]{};
         stack = removeSuffix(stack, prefix);
-        out.println(String.format("reference removed by %s\n\t%s", "",
-            getString(stack).replaceAll("\n", "\n\t")));
+        final String string = getString(stack);
+        if (!string.trim().isEmpty()) out.println(String.format("reference removed by %s\n\t%s", "",
+            string.replaceAll("\n", "\n\t")));
       }
       if (isFinalized && 0 < freeRefs.size()) {
         StackTraceElement[] stack = freeRefs.get(freeRefs.size() - 1);
         stack = removeSuffix(stack, prefix);
-        out.println(String.format("freed by %s\n\t%s", "",
-            (0 == freeRefs.size() ? "" : getString(stack)).replaceAll("\n", "\n\t")));
+        final String string = 0 == freeRefs.size() ? "" : getString(stack);
+        if (!string.trim().isEmpty()) out.println(String.format("freed by %s\n\t%s", "",
+            string.replaceAll("\n", "\n\t")));
       }
     }
     if (includeCaller) out.println(String.format("apply current stack \n\t%s",
