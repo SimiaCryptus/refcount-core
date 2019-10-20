@@ -41,10 +41,13 @@ public class RefSettings implements Settings {
     this.lifecycleDebug = Settings.get("DEBUG_LIFECYCLE", false);
     this.doubleCacheMode = Settings.get("DOUBLE_CACHE_MODE", PersistanceMode.WEAK);
     this.watchedClasses = Stream.<String>of(
-        //"com.simiacryptus.mindseye.network.CountingResult",
-//        "com.simiacryptus.mindseye.lang.PointSample"
-        //"com.simiacryptus.mindseye.lang.cudnn.CudaTensorList"
-//        "com.simiacryptus.mindseye.network.PipelineNetwork"
+        "org.jblas.exceptions.LapackException",
+        "com.simiacryptus.mindseye.art.util.VisualStyleContentNetwork.TileTrainer",
+        "com.simiacryptus.mindseye.lang.Tensor"
+//        "com.simiacryptus.mindseye.network.PipelineNetwork",
+//        "com.simiacryptus.mindseye.network.CountingResult",
+//        "com.simiacryptus.mindseye.lang.PointSample",
+//        "com.simiacryptus.mindseye.lang.cudnn.CudaTensorList",
 //        "com.simiacryptus.mindseye.network.InnerNode",
 //        "com.simiacryptus.mindseye.layers.cudnn.GramianLayer",
 //        "com.simiacryptus.mindseye.layers.java.ImgTileSelectLayer",
@@ -52,11 +55,11 @@ public class RefSettings implements Settings {
 //        "com.simiacryptus.mindseye.layers.java.ImgPixelGateLayer",
 //        "com.simiacryptus.mindseye.network.PipelineNetwork",
 //        "com.simiacryptus.mindseye.lang.StateSet",
-//        "com.simiacryptus.mindseye.lang.DeltaSet"
+//        "com.simiacryptus.mindseye.lang.DeltaSet",
 //        "com.simiacryptus.mindseye.lang.State",
-//        "com.simiacryptus.mindseye.lang.Delta"
-//        "com.simiacryptus.mindseye.lang.Tensor"
-//        "com.simiacryptus.mindseye.network.GraphEvaluationContext"
+//        "com.simiacryptus.mindseye.lang.Delta",
+//        "com.simiacryptus.mindseye.lang.Tensor",
+//        "com.simiacryptus.mindseye.network.GraphEvaluationContext",
 //        "com.simiacryptus.mindseye.layers.cudnn.PoolingLayer",
 //        "com.simiacryptus.mindseye.lang.TensorArray",
 //        "com.simiacryptus.mindseye.lang.cudnn.CudaTensor"
