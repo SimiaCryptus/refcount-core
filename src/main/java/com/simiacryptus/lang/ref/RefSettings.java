@@ -41,9 +41,8 @@ public class RefSettings implements Settings {
     this.lifecycleDebug = Settings.get("DEBUG_LIFECYCLE", false);
     this.doubleCacheMode = Settings.get("DOUBLE_CACHE_MODE", PersistanceMode.WEAK);
     this.watchedClasses = Stream.<String>of(
-        "org.jblas.exceptions.LapackException",
-        "com.simiacryptus.mindseye.art.util.VisualStyleContentNetwork.TileTrainer",
-        "com.simiacryptus.mindseye.lang.Tensor"
+//        "com.simiacryptus.mindseye.art.util.VisualStyleContentNetwork.TileTrainer",
+//        "com.simiacryptus.mindseye.lang.Tensor"
 //        "com.simiacryptus.mindseye.network.PipelineNetwork",
 //        "com.simiacryptus.mindseye.network.CountingResult",
 //        "com.simiacryptus.mindseye.lang.PointSample",
