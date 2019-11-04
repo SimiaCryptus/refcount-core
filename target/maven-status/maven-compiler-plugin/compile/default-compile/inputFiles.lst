@@ -2,6 +2,7 @@ H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\DoubleStatistics.java
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\ref\ReferenceWrapper.java
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\ref\ReferenceCountingBase.java
+H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\ref\LazyVal.java
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\ref\LifecycleException.java
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\ref\RecycleBin.java
 H:\SimiaCryptus\data-science-tools\refcount-core\src\main\java\com\simiacryptus\lang\Settings.java
